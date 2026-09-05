@@ -80,10 +80,22 @@ export default function App() {
     window.location.hash = '#/home'
   }
 
+  async function sendMagicLink(email) {
+    setNotice(''); setAppError('')
+    if (!supabaseConfigured) { setAppError('Supabase is not configured for this deployment.'); return }
+    if (!email) { setAppError('Enter your email address first, then request a sign-in link.'); return }
+    setAuthBusy(true)
+    try {
+      const { error } = await withTimeout(supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: `${window.location.origin}/#/dashboard` } }))
+      if (error) throw error
+      setNotice('Check your email for a secure sign-in link. It will open your IDENTIX workspace automatically.')
+    } catch (error) { setAppError(friendlyError(error, 'Unable to send a sign-in link. Please try again.')) } finally { setAuthBusy(false) }
+  }
+
   const go = (next) => { window.location.hash = `#/${next}` }
   const currentUserName = profile?.full_name || session?.user?.email?.split('@')[0] || 'there'
 
-  if (['login', 'signup'].includes(route)) return <AuthPage mode={route} setMode={setAuthMode} authMode={authMode} onSubmit={submitAuth} busy={authBusy} error={appError} notice={notice} go={go} />
+  if (['login', 'signup'].includes(route)) return <AuthPage mode={route} setMode={setAuthMode} authMode={authMode} onSubmit={submitAuth} onMagicLink={sendMagicLink} busy={authBusy} error={appError} notice={notice} go={go} />
   if (!session) return <Landing go={go} />
   if (route === 'home') { window.location.hash = '#/dashboard'; return null }
 
@@ -114,7 +126,7 @@ function Landing({ go }) {
   </main><footer className="public-footer container"><Brand go={go} /><span>© 2026 IDENTIX / Smart India Hackathon</span></footer></div>
 }
 function Benefit({ icon, title, text }) { return <article className="benefit"><b>{icon}</b><h3>{title}</h3><p>{text}</p></article> }
-function AuthPage({ mode, setMode, authMode, onSubmit, busy, error, notice, go }) {
+function AuthPage({ mode, setMode, authMode, onSubmit, onMagicLink, busy, error, notice, go }) {
   const [form, setForm] = useState({ fullName: '', email: '', password: '', mobile: '', organization: '' })
   const signup = mode === 'signup'
   useEffect(() => setMode(mode), [mode, setMode])

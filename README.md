@@ -34,6 +34,8 @@ Requirements: Node.js 18+ and a Supabase project.
 
 4. In Supabase Authentication, enable the Email provider. For quick local testing, email confirmation can be disabled temporarily.
 
+   For password-free access, users can request a secure email sign-in link from the login screen. Add your Vercel deployment URL to **Authentication → URL Configuration → Redirect URLs** in Supabase so the link can return users to the deployed workspace.
+
 5. Start the app:
 
    ```bash
@@ -63,7 +65,7 @@ Those are already excluded by `.gitignore`. Keep `.env.example` in the repositor
 3. Vercel detects Vite automatically. The included `vercel.json` uses:
    - Build command: `npm run build`
    - Output directory: `dist`
-4. Add these Environment Variables in Vercel for **Production**, **Preview**, and **Development**:
+4. This repository includes `.env.production` with the project's public Supabase URL and anon key, so Vercel builds are configured automatically. You can instead add these Environment Variables in Vercel for **Production**, **Preview**, and **Development** if you prefer to manage them in Vercel:
 
    ```text
    VITE_SUPABASE_URL
