@@ -66,11 +66,13 @@ export default function App() {
       if (submittedMode === 'login') {
         const { error } = await withTimeout(supabase.auth.signInWithPassword({ email: form.email, password: form.password }))
         if (error) throw error
+        window.location.hash = '#/dashboard'
       } else {
         const { data, error } = await withTimeout(supabase.auth.signUp({ email: form.email, password: form.password, options: { data: { full_name: form.fullName, mobile: form.mobile, organization: form.organization } } }))
         if (error) throw error
         if (data.user && data.session) await loadProfile(data.user)
         setNotice(data.session ? 'Account created. You can now use your workspace.' : 'Account created. Check your email to confirm the account, then sign in.')
+        if (data.session) window.location.hash = '#/dashboard'
       }
     } catch (error) { setAppError(friendlyError(error, 'Authentication failed. Please try again.')) } finally { setAuthBusy(false) }
   }
